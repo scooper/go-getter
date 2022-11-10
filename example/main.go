@@ -4,13 +4,17 @@ import (
 	"fmt"
 
 	gg "github.com/scooper/go-getter"
+	"github.com/scooper/go-getter/pkg/context"
 )
 
 func main() {
-	app := gg.CreateApp()
-	fmt.Println(app)
+	ctx := gg.CreateContext()
+	fmt.Println(ctx)
 
-	// maybe it should be app.start?
+	ctx.Route("/hello", "GET", func(request *context.Request) *context.Response {
+		return context.Text("Hello World!")
+	})
+
 	// maybe we should be creating a context, or gogetter instance, rather than an app?
-	gg.Start()
+	ctx.Start()
 }
