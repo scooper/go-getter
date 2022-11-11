@@ -15,6 +15,5 @@ func main() {
 		return context.Text("Hello World!")
 	})
 
-	// maybe we should be creating a context, or gogetter instance, rather than an app?
 	ctx.Start()
 }

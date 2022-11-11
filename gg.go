@@ -6,10 +6,12 @@ import (
 	"net/http"
 
 	"github.com/scooper/go-getter/pkg/context"
+	"github.com/scooper/go-getter/pkg/settings"
 )
 
 type ggcontext struct {
 	routes map[string]func(w http.ResponseWriter, request *http.Request)
+	settings settings.Settings // this repeating is awful, think about better names
 }
 
 type GG interface {
@@ -21,7 +23,12 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 	wrapped := func(w http.ResponseWriter, request *http.Request) {
 		ggrequest := context.CreateRequest(request)
 		ggresponse := f(ggrequest)
-		ggresponse.Response.Write(w)
+		
+		for header, value := range ggresponse.Headers {
+			w.Header().Add(header, value)
+		}
+
+		w.Write([]byte(ggresponse.Body))
 	}
 
 	ctx.routes[r] = wrapped
@@ -35,7 +42,7 @@ func (ctx *ggcontext) Start() {
 	}
 
 	// start server
-	err := http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":"+ctx.settings.Port, nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Println("Server Closed")
 	}
@@ -44,5 +51,6 @@ func (ctx *ggcontext) Start() {
 func CreateContext() GG {
 	return &ggcontext{
 		routes: make(map[string]func(w http.ResponseWriter, request *http.Request)),
+		settings: settings.Get(),
 	}
 }
