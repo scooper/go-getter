@@ -12,14 +12,23 @@ type Settings struct {
 	Port  string `json:"port"`
 }
 
-// TODO: handle errors / log
 // TODO: better filepath code
-func Get() Settings {
-	path, _ := filepath.Abs("./settings.json")
-	settingsJson, _ := os.Open(path)
+func Get() (*Settings, error) {
+	path, perr := filepath.Abs("./settings.json")
+	if perr != nil {
+		return nil, perr
+	}
+	settingsJson, ferr := os.Open(path)
+	if ferr != nil {
+		return nil, ferr
+	}
+
 	defer settingsJson.Close()
-	var settings Settings
+	var settings *Settings
 	settingsAsBytes, _ := ioutil.ReadAll(settingsJson)
-	json.Unmarshal(settingsAsBytes, &settings)
-	return settings
+	jsonErr := json.Unmarshal(settingsAsBytes, settings)
+	if jsonErr != nil {
+		return nil, jsonErr
+	}
+	return settings, nil
 }
