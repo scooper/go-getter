@@ -26,7 +26,7 @@ func Get() (*Settings, error) {
 	defer settingsJson.Close()
 	var settings *Settings
 	settingsAsBytes, _ := ioutil.ReadAll(settingsJson)
-	jsonErr := json.Unmarshal(settingsAsBytes, settings)
+	jsonErr := json.Unmarshal(settingsAsBytes, &settings)
 	if jsonErr != nil {
 		return nil, jsonErr
 	}

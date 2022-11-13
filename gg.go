@@ -2,6 +2,7 @@ package gg
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/scooper/go-getter/pkg/context"
@@ -30,6 +31,7 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 			w.Header().Add(header, value)
 		}
 
+		ctx.logger.Info(fmt.Sprintf("%s: %s - %d", request.Method, request.RequestURI, ggresponse.StatusCode))
 		w.Write([]byte(ggresponse.Body))
 	}
 
@@ -58,7 +60,7 @@ func CreateContext() GG {
 	s, settingsErr := settings.Get()
 
 	if settingsErr != nil {
-		logger.Error("Problem opening settings.json")
+		logger.Error("Problem opening settings.json: " + settingsErr.Error())
 	}
 
 	return &ggcontext{

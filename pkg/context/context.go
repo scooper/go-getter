@@ -40,6 +40,7 @@ type Response struct {
 func Text(content string) *Response {
 	response := &Response{
 		Body: content,
+		StatusCode: 200,
 		Headers: make(map[string]string),
 	}
 
