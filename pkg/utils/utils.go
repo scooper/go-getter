@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type logger struct {
@@ -35,4 +37,27 @@ func CreateLogger() Logger {
 		debug: log.New(os.Stdout, "DEBUG: ", log.Ltime|log.Ldate),
 		err: log.New(os.Stdout, "ERROR: ", log.Ltime|log.Ldate),
 	}
+}
+
+func GetSetting(path string) (*os.File, error) {
+	return getFile("settings", path)
+}
+
+func GetTemplate(path string) (*os.File, error) {
+	return getFile("templates", path)
+}
+
+func getFile(base string, fpath string) (*os.File, error) {
+	// look in directory of currently running process
+	path, perr := filepath.Abs(fmt.Sprintf("./%s/%s", base, fpath))
+	if perr != nil {
+		return nil, perr
+	}
+
+	file, ferr := os.Open(path)
+	if ferr != nil {
+		return nil, ferr
+	}
+
+	return file, nil
 }
