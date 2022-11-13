@@ -28,7 +28,7 @@ func (l *logger) Debug(s string) {
 }
 
 func (l *logger) Error(s string) {
-	l.err.Println("\033[0;31m"+s)
+	l.err.Println(s)
 }
 
 func CreateLogger() Logger {
