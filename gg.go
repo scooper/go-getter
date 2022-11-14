@@ -27,12 +27,20 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 		ggrequest := context.CreateRequest(request)
 		ggresponse := f(ggrequest)
 		
+		if ggresponse.Error != nil {
+			ctx.logger.Error(fmt.Sprintf("Server Error: %s", ggresponse.Error.Error()))
+			ggresponse.Body = "Internal Server Error"
+			ggresponse.Headers["Content-Type"] = "text/plain"
+		}
+		
 		for header, value := range ggresponse.Headers {
 			w.Header().Add(header, value)
 		}
-
-		ctx.logger.Info(fmt.Sprintf("%s: %s - %d", request.Method, request.RequestURI, ggresponse.StatusCode))
+		
+		w.WriteHeader(ggresponse.StatusCode)
 		w.Write([]byte(ggresponse.Body))
+		
+		ctx.logger.Info(fmt.Sprintf("%s: %s - %d", request.Method, request.RequestURI, ggresponse.StatusCode))
 	}
 
 	ctx.routes[r] = wrapped
