@@ -39,7 +39,7 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 		
 		w.WriteHeader(ggresponse.StatusCode)
 		w.Write([]byte(ggresponse.Body))
-		
+
 		ctx.logger.Info(fmt.Sprintf("%s: %s - %d", request.Method, request.RequestURI, ggresponse.StatusCode))
 	}
 

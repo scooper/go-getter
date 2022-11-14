@@ -58,11 +58,13 @@ func Text(content string) *Response {
 func Template(filepath string, data any) *Response {
 
 	tfile, ferr := utils.GetTemplate(filepath)
-	
+	headers :=  make(map[string]string)
+
 	if ferr != nil {
 		return &Response {
 			StatusCode: 500,
 			Error: ferr,
+			Headers: headers,
 		}
 	}
 
@@ -77,6 +79,7 @@ func Template(filepath string, data any) *Response {
 		return &Response {
 			StatusCode: 500,
 			Error: terr,
+			Headers: headers,
 		}
 	}
 
@@ -87,7 +90,7 @@ func Template(filepath string, data any) *Response {
 	response := &Response {
 		StatusCode: 200, // TODO: easier way to change this?
 		Body: bodyBuf.String(),
-		Headers: make(map[string]string),
+		Headers: headers,
 	}
 
 	response.Headers["Content-Type"] = "text/html"
