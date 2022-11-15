@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/scooper/go-getter/pkg/context"
 	"github.com/scooper/go-getter/pkg/settings"
@@ -23,9 +24,28 @@ type GG interface {
 
 func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Request) *context.Response) {
 	wrapped := func(w http.ResponseWriter, request *http.Request) {
-		// TODO: log request information
+		methodSlice := strings.Split(methods, ",")
+		validMethod := true
+
+		// check if method is valid
+		for _, m := range methodSlice {
+			if m == request.Method {
+				validMethod = false
+				break
+			}
+		}
+
 		ggrequest := context.CreateRequest(request)
-		ggresponse := f(ggrequest)
+		var ggresponse *context.Response
+
+		if validMethod {
+			ggresponse = f(ggrequest)
+		} else {
+			// default invalid response
+			ggresponse.StatusCode = 403
+			ggresponse.Body = "Forbidden"
+			ggresponse.Headers["Content-Type"] = "text/plain"
+		}
 		
 		if ggresponse.Error != nil {
 			errorStr := ggresponse.Error.Error()
