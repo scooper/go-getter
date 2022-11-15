@@ -28,9 +28,18 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 		ggresponse := f(ggrequest)
 		
 		if ggresponse.Error != nil {
-			ctx.logger.Error(fmt.Sprintf("Server Error: %s", ggresponse.Error.Error()))
-			ggresponse.Body = "Internal Server Error"
-			ggresponse.Headers["Content-Type"] = "text/plain"
+			errorStr := ggresponse.Error.Error()
+			ctx.logger.Error(fmt.Sprintf("Server Error: %s", errorStr))
+
+			if !ctx.settings.Debug {
+				errorStr = ""
+			}
+
+			ggresponse.Body = fmt.Sprintf("<!DOCTYPE><html><body><h1>Internal Server Error (%d)</h1><p>%s</p></body></html>",
+			ggresponse.StatusCode,
+			errorStr)
+
+			ggresponse.Headers["Content-Type"] = "text/html"
 		}
 		
 		for header, value := range ggresponse.Headers {
