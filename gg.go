@@ -35,7 +35,7 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 			}
 		}
 
-		ggrequest := context.CreateRequest(request)
+		ggrequest := context.CreateRequest(request, methodSlice)
 		var ggresponse *context.Response
 
 		if validMethod {

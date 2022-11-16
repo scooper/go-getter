@@ -9,10 +9,11 @@ import (
 	"github.com/scooper/go-getter/pkg/utils"
 )
 
+
 type Request struct {
 	r *http.Request
 	Method string
-	MimeType string
+	AllowedMethods []string
 }
 
 func (ggrequest *Request) Args(name string) string {
@@ -23,10 +24,11 @@ func (ggrequest *Request) Form(name string) string {
 	return ggrequest.r.FormValue(name)
 }
 
-func CreateRequest(r *http.Request) *Request {
+func CreateRequest(r *http.Request, allowedMethods []string) *Request {
 	return &Request{
 		r: r,
 		Method: r.Method,
+		AllowedMethods: allowedMethods,
 	}
 }
 
