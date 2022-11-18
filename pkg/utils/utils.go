@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,6 +18,14 @@ type Logger interface {
 	Info(s string)
 	Debug(s string)
 	Error(s string)
+	SetFile(f *os.File)
+}
+
+func (l *logger) SetFile(f *os.File) {
+	mw := io.MultiWriter(os.Stdout, f)
+	l.info.SetOutput(mw)
+	l.debug.SetOutput(mw)
+	l.err.SetOutput(mw)
 }
 
 func (l *logger) Info(s string) {
@@ -40,21 +49,31 @@ func CreateLogger() Logger {
 }
 
 func GetSetting(path string) (*os.File, error) {
-	return getFile("settings", path)
+	return getFile("settings", path, false)
 }
 
 func GetTemplate(path string) (*os.File, error) {
-	return getFile("templates", path)
+	return getFile("templates", path, false)
 }
 
-func getFile(base string, fpath string) (*os.File, error) {
+func GetLogs(path string) (*os.File, error) {
+	return getFile("logs", path, true)
+}
+
+func getFile(base string, fpath string, create bool) (*os.File, error) {
 	// look in directory of currently running process
 	path, perr := filepath.Abs(fmt.Sprintf("./%s/%s", base, fpath))
 	if perr != nil {
 		return nil, perr
 	}
 
-	file, ferr := os.Open(path)
+	flags := os.O_APPEND
+
+	if create {
+		flags = flags | os.O_CREATE
+	}
+
+	file, ferr := os.OpenFile(path, flags, 0777)
 	if ferr != nil {
 		return nil, ferr
 	}

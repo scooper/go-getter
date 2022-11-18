@@ -10,6 +10,11 @@ import (
 type Settings struct {
 	Debug bool   `json:"debug"`
 	Port  string `json:"port"`
+	LoggingSettings LoggingSettings `json:"logging"`
+}
+
+type LoggingSettings struct {
+	LogToFile bool `json:"logToFile"`
 }
 
 // TODO: better filepath code

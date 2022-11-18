@@ -16,3 +16,6 @@
 
 # Vs code
 /.vscode
+
+# example log files
+/example/logs/*.log

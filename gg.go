@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/scooper/go-getter/pkg/context"
 	"github.com/scooper/go-getter/pkg/settings"
@@ -25,12 +26,12 @@ type GG interface {
 func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Request) *context.Response) {
 	wrapped := func(w http.ResponseWriter, request *http.Request) {
 		methodSlice := strings.Split(methods, ",")
-		validMethod := true
+		validMethod := false
 
 		// check if method is valid
 		for _, m := range methodSlice {
 			if m == request.Method {
-				validMethod = false
+				validMethod = true
 				break
 			}
 		}
@@ -44,6 +45,7 @@ func (ctx *ggcontext) Route(r string, methods string, f func(request *context.Re
 			// default invalid response
 			ggresponse.StatusCode = 403
 			ggresponse.Body = "Forbidden"
+			ggresponse.Headers = make(map[string]string)
 			ggresponse.Headers["Content-Type"] = "text/plain"
 		}
 		
@@ -95,9 +97,20 @@ func CreateContext() GG {
 	logger := utils.CreateLogger()
 
 	s, settingsErr := settings.Get()
-
+	
 	if settingsErr != nil {
 		logger.Error("Problem opening settings.json: " + settingsErr.Error())
+	}
+
+	if s.LoggingSettings.LogToFile {
+		dateStr := time.Now().Format("2006-01-02")
+		logFile, logErr := utils.GetLogs(dateStr+".log")
+
+		if logErr != nil {
+			logger.Error("Problem opening log file: " + logErr.Error())
+		}
+
+		logger.SetFile(logFile)
 	}
 
 	return &ggcontext{
